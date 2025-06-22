@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Empleados</title>
+  <link rel="stylesheet" href="css/productos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="">
+</head>
+<body>
+
+  <!-- Menú de navegación -->
+  <nav class="menu">
+    <div class="menu-logo">ShopLoop</div>
+    <div class="menu-links">
+      <a href="principal.html">Principal</a>
+      <a href="productos.html">Productos</a>
+      <a href="categorias.html">Categorías</a>
+      <a href="proveedores.html">Proveedores</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="index.html" class="cerrar">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <main class="contenido">
+    <h1 class="titulo">👨‍💼 Gestión de Empleados</h1>
+
+    <section class="formulario-section">
+      <h2>➕ Agregar / ✏️ Modificar Empleado</h2>
+      <form id="formEmpleado" class="formulario">
+        <input type="text" id="nombre" placeholder="Nombre completo" required />
+        <input type="tel" id="telefono" placeholder="Teléfono" required />
+        <input type="text" id="rfc" placeholder="RFC" required />
+        <input type="text" id="puesto" placeholder="Puesto" required />
+        <input type="text" id="direccion" placeholder="Dirección" required />
+        <input type="date" id="fechaIngreso" placeholder="Fecha de ingreso" required />
+        <input type="number" id="salario" placeholder="Salario $" min="0" required />
+        <button type="submit">Guardar Empleado</button>
+      </form>
+    </section>
+
+    <section class="tabla-container">
+      <table id="tablaEmpleados">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>RFC</th>
+            <th>Puesto</th>
+            <th>Dirección</th>
+            <th>Fecha de Ingreso</th>
+            <th>Salario</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empleados se cargan aquí -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    async function cargarEmpleados() {
+      try {
+        const res = await fetch('/api/empleados');
+        const empleados = await res.json();
+        const tbody = document.querySelector('#tablaEmpleados tbody');
+        tbody.innerHTML = empleados.map(e => `
+          <tr class="fila-animada">
+            <td>${e.nombre}</td>
+            <td>${e.telefono}</td>
+            <td>${e.rfc}</td>
+            <td>${e.puesto}</td>
+            <td>${e.direccion}</td>
+            <td>${new Date(e.fechaIngreso).toLocaleDateString()}</td>
+            <td>$${parseFloat(e.salario).toFixed(2)}</td>
+            <td>
+  <div class="acciones">
+    <button class="btn-editar" onclick="cargarEmpleadoEditar('${e._id}')">✏️ Modificar</button>
+    <button class="btn-eliminar" onclick="eliminarEmpleado('${e._id}')">🗑️ Eliminar</button>
+  </div>
+</td>
+
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error("Error al cargar empleados:", err);
+      }
+    }
+
+    async function eliminarEmpleado(id) {
+      if (!confirm("¿Deseas eliminar este empleado?")) return;
+      try {
+        await fetch(`/api/empleados/${id}`, { method: 'DELETE' });
+        cargarEmpleados();
+      } catch (err) {
+        console.error("Error al eliminar empleado:", err);
+      }
+    }
+
+    async function cargarEmpleadoEditar(id) {
+      try {
+        const res = await fetch(`/api/empleados`);
+        const empleados = await res.json();
+        const empleado = empleados.find(e => e._id === id);
+
+        document.getElementById('nombre').value = empleado.nombre;
+        document.getElementById('telefono').value = empleado.telefono;
+        document.getElementById('rfc').value = empleado.rfc;
+        document.getElementById('puesto').value = empleado.puesto;
+        document.getElementById('direccion').value = empleado.direccion;
+        document.getElementById('fechaIngreso').value = empleado.fechaIngreso.split('T')[0];
+        document.getElementById('salario').value = empleado.salario;
+
+        document.getElementById('formEmpleado').setAttribute('data-id', id);
+      } catch (err) {
+        console.error("Error al cargar empleado para editar:", err);
+      }
+    }
+
+    document.getElementById('formEmpleado').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const rfc = document.getElementById('rfc').value.trim();
+      const puesto = document.getElementById('puesto').value.trim();
+      const direccion = document.getElementById('direccion').value.trim();
+      const fechaIngreso = document.getElementById('fechaIngreso').value;
+      const salario = parseFloat(document.getElementById('salario').value);
+      const id = e.target.getAttribute('data-id');
+
+      if (!nombre || !telefono || !rfc || !puesto || !direccion || !fechaIngreso || isNaN(salario)) {
+        return alert("Llena todos los campos correctamente.");
+      }
+
+      const empleado = { nombre, telefono, rfc, puesto, direccion, fechaIngreso, salario };
+
+      try {
+        if (id) {
+          await fetch(`/api/empleados/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(empleado)
+          });
+          e.target.removeAttribute('data-id');
+        } else {
+          await fetch('/api/empleados', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(empleado)
+          });
+        }
+
+        e.target.reset();
+        cargarEmpleados();
+      } catch (err) {
+        console.error("Error al guardar empleado:", err);
+      }
+    });
+
+    cargarEmpleados();
+    window.eliminarEmpleado = eliminarEmpleado;
+    window.cargarEmpleadoEditar = cargarEmpleadoEditar;
+  </script>
+
+</body>
+</html>

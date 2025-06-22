@@ -1,0 +1,152 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #F4F4F4;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.principal {
+    display: flex;
+    width: 90%;
+    max-width: 900px;
+    height: auto;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 30px #00000088;
+}
+
+/* Parte izquierda con imagen */
+.imagen {
+    flex: 1;
+    background-color: #22364b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+.imagen img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Parte derecha con formulario */
+.formulario {
+    flex: 1;
+    background-color: #F4F4F4;
+    color: #2C3E50;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+.formulario h2 {
+    font-size: 28px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.formulario p {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #2C3E50;
+}
+
+/* Botón principal */
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #2C3E50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #15273b;
+}
+
+/* Botón regresar */
+button.btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #999;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.btn:hover {
+    background-color: #777;
+}
+
+@media (max-width: 768px) {
+  .principal {
+    flex-direction: column;
+    width: 95%;
+    height: auto;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .imagen,
+  .formulario {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .formulario h2 {
+    font-size: 24px;
+  }
+
+  .formulario p {
+    font-size: 14px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  button[type="submit"],
+  button.btn {
+    font-size: 15px;
+    padding: 10px;
+  }
+}
+

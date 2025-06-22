@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Categorías</title>
+  <link rel="stylesheet" href="css/productos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="">
+</head>
+<body>
+
+  <!-- Menú de navegación -->
+  <nav class="menu">
+    <div class="menu-logo">ShopLoop</div>
+    <div class="menu-links">
+      <a href="principal.html">Principal</a>
+      <a href="productos.html">Productos</a>
+      <a href="empleados.html">Empleados</a>
+      <a href="proovedores.html">Proveedores</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="index.html" class="cerrar">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <main class="contenido">
+    <h1 class="titulo">📂 Gestión de Categorías</h1>
+
+    <section class="formulario-section">
+      <h2>➕ Agregar / ✏️ Modificar Categoría</h2>
+      <form id="formCategoria" class="formulario">
+        <input type="text" id="nombre" placeholder="Nombre de la categoría" required />
+        <input type="text" id="descripcion" placeholder="Descripción" required />
+        <button type="submit">Guardar Categoría</button>
+      </form>
+    </section>
+
+    <section class="tabla-container">
+      <table id="tablaCategorias">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Numero de productos</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Categorías se cargan aquí -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    async function cargarCategorias() {
+      try {
+        const res = await fetch('/api/categorias');
+        const categorias = await res.json();
+        const tbody = document.querySelector('#tablaCategorias tbody');
+        tbody.innerHTML = categorias.map(c => `
+          <tr class="fila-animada">
+            <td>${c.nombre}</td>
+            <td>${c.descripcion}</td>
+            <td>${c.totalProductos || 0}</td>
+            <td>
+              <button class="btn-editar" onclick="cargarCategoriaEditar('${c._id}')">✏️ Modificar</button>
+              <button class="btn-eliminar" onclick="eliminarCategoria('${c._id}')">🗑️ Eliminar</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error("Error al cargar categorías:", err);
+      }
+    }
+
+    async function eliminarCategoria(id) {
+      if (!confirm("¿Deseas eliminar esta categoría?")) return;
+      try {
+        await fetch(`/api/categorias/${id}`, { method: 'DELETE' });
+        cargarCategorias();
+      } catch (err) {
+        console.error("Error al eliminar categoría:", err);
+      }
+    }
+
+    async function cargarCategoriaEditar(id) {
+      try {
+        const res = await fetch(`/api/categorias`);
+        const categorias = await res.json();
+        const categoria = categorias.find(c => c._id === id);
+
+        document.getElementById('nombre').value = categoria.nombre;
+        document.getElementById('descripcion').value = categoria.descripcion;
+
+        document.getElementById('formCategoria').setAttribute('data-id', id);
+      } catch (err) {
+        console.error("Error al cargar categoría para editar:", err);
+      }
+    }
+
+    document.getElementById('formCategoria').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const descripcion = document.getElementById('descripcion').value.trim();
+      const id = e.target.getAttribute('data-id');
+
+      if (!nombre || !descripcion) {
+        return alert("Llena todos los campos.");
+      }
+
+      const categoria = { nombre, descripcion };
+
+      try {
+        if (id) {
+          await fetch(`/api/categorias/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(categoria)
+          });
+          e.target.removeAttribute('data-id');
+        } else {
+          await fetch('/api/categorias', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(categoria)
+          });
+        }
+
+        e.target.reset();
+        cargarCategorias();
+      } catch (err) {
+        console.error("Error al guardar categoría:", err);
+      }
+    });
+
+    cargarCategorias();
+    window.eliminarCategoria = eliminarCategoria;
+    window.cargarCategoriaEditar = cargarCategoriaEditar;
+  </script>
+
+</body>
+</html>

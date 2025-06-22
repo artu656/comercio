@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Proveedores</title>
+  <link rel="stylesheet" href="css/productos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="">
+</head>
+<body>
+
+  <!-- Menú de navegación -->
+  <nav class="menu">
+    <div class="menu-logo">ShopLoop</div>
+    <div class="menu-links">
+      <a href="principal.html">Principal</a>
+      <a href="productos.html">Productos</a>
+      <a href="categorias.html">Categorías</a>
+      <a href="empleados.html">Empleados</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="index.html" class="cerrar">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <main class="contenido">
+    <h1 class="titulo">🚚 Gestión de Proveedores</h1>
+
+    <section class="formulario-section">
+      <h2>➕ Agregar / ✏️ Modificar Proveedor</h2>
+      <form id="formProveedor" class="formulario">
+        <input type="text" id="nombre" placeholder="Nombre del proveedor" required />
+        <input type="tel" id="telefono" placeholder="Teléfono" required />
+        <input type="email" id="email" placeholder="Correo electrónico" required />
+        <input type="text" id="direccion" placeholder="Dirección" required />
+        <input type="text" id="categoria" placeholder="Categoría de productos que provee" required />
+        <button type="submit">Guardar Proveedor</button>
+      </form>
+    </section>
+
+    <section class="tabla-container">
+      <table id="tablaProveedores">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Dirección</th>
+            <th>Categoría</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Proveedores se cargan aquí -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    async function cargarProveedores() {
+      try {
+        const res = await fetch('/api/proveedores');
+        const proveedores = await res.json();
+        const tbody = document.querySelector('#tablaProveedores tbody');
+        tbody.innerHTML = proveedores.map(p => `
+          <tr class="fila-animada">
+            <td>${p.nombre}</td>
+            <td>${p.telefono}</td>
+            <td>${p.email}</td>
+            <td>${p.direccion}</td>
+            <td>${p.categoria}</td>
+            <td>
+              <button class="btn-editar" onclick="cargarProveedorEditar('${p._id}')">✏️ Modificar</button>
+              <button class="btn-eliminar" onclick="eliminarProveedor('${p._id}')">🗑️ Eliminar</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error("Error al cargar proveedores:", err);
+      }
+    }
+
+    async function eliminarProveedor(id) {
+      if (!confirm("¿Deseas eliminar este proveedor?")) return;
+      try {
+        await fetch(`/api/proveedores/${id}`, { method: 'DELETE' });
+        cargarProveedores();
+      } catch (err) {
+        console.error("Error al eliminar proveedor:", err);
+      }
+    }
+
+    async function cargarProveedorEditar(id) {
+      try {
+        const res = await fetch('/api/proveedores');
+        const proveedores = await res.json();
+        const proveedor = proveedores.find(p => p._id === id);
+
+        document.getElementById('nombre').value = proveedor.nombre;
+        document.getElementById('telefono').value = proveedor.telefono;
+        document.getElementById('email').value = proveedor.email;
+        document.getElementById('direccion').value = proveedor.direccion;
+        document.getElementById('categoria').value = proveedor.categoria;
+
+        document.getElementById('formProveedor').setAttribute('data-id', id);
+      } catch (err) {
+        console.error("Error al cargar proveedor para editar:", err);
+      }
+    }
+
+    document.getElementById('formProveedor').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const direccion = document.getElementById('direccion').value.trim();
+      const categoria = document.getElementById('categoria').value.trim();
+      const id = e.target.getAttribute('data-id');
+
+      if (!nombre || !telefono || !email || !direccion || !categoria) {
+        return alert("Llena todos los campos correctamente.");
+      }
+
+      const proveedor = { nombre, telefono, email, direccion, categoria };
+
+      try {
+        if (id) {
+          await fetch(`/api/proveedores/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(proveedor)
+          });
+          e.target.removeAttribute('data-id');
+        } else {
+          await fetch('/api/proveedores', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(proveedor)
+          });
+        }
+
+        e.target.reset();
+        cargarProveedores();
+      } catch (err) {
+        console.error("Error al guardar proveedor:", err);
+      }
+    });
+
+    cargarProveedores();
+    window.eliminarProveedor = eliminarProveedor;
+    window.cargarProveedorEditar = cargarProveedorEditar;
+  </script>
+</body>
+</html>

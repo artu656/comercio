@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device.width, initial-scale=1.0" />
+  <title>Gestión de Clientes</title>
+  <link rel="stylesheet" href="css/productos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="">
+</head>
+<body>
+
+  <!-- Menú de navegación -->
+  <nav class="menu">
+    <div class="menu-logo">ShopLoop</div>
+    <div class="menu-links">
+      <a href="principal.html">Principal</a>
+      <a href="productos.html">Productos</a>
+      <a href="categorias.html">Categorías</a>
+      <a href="empleados.html">Empleados</a>
+      <a href="proveedores.html">Proveedores</a>
+      <a href="index.html" class="cerrar">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <main class="contenido">
+    <h1 class="titulo">👥 Gestión de Clientes</h1>
+
+    <section class="formulario-section">
+      <h2>➕ Agregar / ✏️ Modificar Cliente</h2>
+      <form id="formCliente" class="formulario">
+        <input type="text" id="nombre" placeholder="Nombre del cliente" required />
+        <input type="tel" id="telefono" placeholder="Teléfono" required />
+        <input type="text" id="direccion" placeholder="Dirección" required />
+        <input type="number" id="numeroCompras" placeholder="Número de compras" required min="0" />
+        <input type="number" id="montoTotal" placeholder="Monto total ($)" required min="0" />
+        <button type="submit">Guardar Cliente</button>
+      </form>
+    </section>
+
+    <section class="tabla-container">
+      <table id="tablaClientes">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>Número de compras</th>
+            <th>Monto total</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Clientes se cargan aquí -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    async function cargarClientes() {
+      try {
+        const res = await fetch('/api/clientes');
+        const clientes = await res.json();
+        const tbody = document.querySelector('#tablaClientes tbody');
+        tbody.innerHTML = clientes.map(c => `
+          <tr class="fila-animada">
+            <td>${c.nombre}</td>
+            <td>${c.telefono}</td>
+            <td>${c.direccion}</td>
+            <td>${c.numeroCompras}</td>
+            <td>$${parseFloat(c.montoTotal).toFixed(2)}</td>
+            <td>
+              <button class="btn-editar"  onclick="cargarClienteEditar('${c._id}')">✏️ Modificar</button>
+              <button class="btn-eliminar"onclick="eliminarCliente('${c._id}')">🗑️ Eliminar</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error("Error al cargar clientes:", err);
+      }
+    }
+
+    async function eliminarCliente(id) {
+      if (!confirm("¿Deseas eliminar este cliente?")) return;
+      try {
+        await fetch(`/api/clientes/${id}`, { method: 'DELETE' });
+        cargarClientes();
+      } catch (err) {
+        console.error("Error al eliminar cliente:", err);
+      }
+    }
+
+    async function cargarClienteEditar(id) {
+      try {
+        const res = await fetch('/api/clientes');
+        const clientes = await res.json();
+        const cliente = clientes.find(c => c._id === id);
+
+        document.getElementById('nombre').value = cliente.nombre;
+        document.getElementById('telefono').value = cliente.telefono;
+        document.getElementById('direccion').value = cliente.direccion;
+        document.getElementById('numeroCompras').value = cliente.numeroCompras;
+        document.getElementById('montoTotal').value = cliente.montoTotal;
+
+        document.getElementById('formCliente').setAttribute('data-id', id);
+      } catch (err) {
+        console.error("Error al cargar cliente para editar:", err);
+      }
+    }
+
+    document.getElementById('formCliente').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const direccion = document.getElementById('direccion').value.trim();
+      const numeroCompras = parseInt(document.getElementById('numeroCompras').value);
+      const montoTotal = parseFloat(document.getElementById('montoTotal').value);
+      const id = e.target.getAttribute('data-id');
+
+      if (!nombre || !telefono || !direccion || isNaN(numeroCompras) || isNaN(montoTotal) || numeroCompras < 0 || montoTotal < 0) {
+        return alert("Llena todos los campos correctamente.");
+      }
+
+      const cliente = { nombre, telefono, direccion, numeroCompras, montoTotal };
+      try {
+        if (id) {
+          await fetch(`/api/clientes/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cliente)
+          });
+          e.target.removeAttribute('data-id');
+        } else {
+          await fetch('/api/clientes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cliente)
+          });
+        }
+
+        e.target.reset();
+        cargarClientes();
+      } catch (err) {
+        console.error("Error al guardar cliente:", err);
+      }
+    });
+
+    cargarClientes();
+    window.eliminarCliente = eliminarCliente;
+    window.cargarClienteEditar = cargarClienteEditar;
+  </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Productos</title>
+  <link rel="stylesheet" href="css/productos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="">
+</head>
+<body>
+
+  <!-- Menú de navegación -->
+  <nav class="menu">
+    <div class="menu-logo">ShopLoop</div>
+    <div class="menu-links">
+      <a href="principal.html">Principal</a>
+      <a href="categorias.html">Categorías</a>
+      <a href="empleados.html">Empleados</a>
+      <a href="proveedores.html">Proveedores</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="index.html" class="cerrar">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <main class="contenido">
+    <h1 class="titulo">📦 Gestión de Productos</h1>
+
+    <section class="formulario-section">
+      <h2>➕ Agregar / ✏️ Modificar Producto</h2>
+      <form id="formProducto" class="formulario">
+        <input type="text" id="nombre" placeholder="Nombre del producto" required />
+        <input type="number" id="precio" placeholder="Precio $" required min="0" />
+        <input type="number" id="stock" placeholder="Stock disponible" required min="0" />
+        <input type="text" id="categoria" placeholder="Categoría" required />
+        <button type="submit">Guardar Producto</button>
+      </form>
+    </section>
+
+    <section class="tabla-container">
+      <table id="tablaProductos">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Categoría</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Productos se cargan aquí -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    async function cargarProductos() {
+      try {
+        const res = await fetch('/api/productos');
+        const productos = await res.json();
+        const tbody = document.querySelector('#tablaProductos tbody');
+        tbody.innerHTML = productos.map(p => `
+          <tr class="fila-animada">
+            <td>${p.nombre}</td>
+            <td>$${parseFloat(p.precio).toFixed(2)}</td>
+            <td>${p.stock}</td>
+            <td>${p.categoria}</td>
+            <td>
+              <button class="btn-editar" onclick="cargarProductoEditar('${p._id}')">✏️ Modificar</button>
+              <button class="btn-eliminar" onclick="eliminarProducto('${p._id}')">🗑️ Eliminar</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error("Error al cargar productos:", err);
+      }
+    }
+
+    async function eliminarProducto(id) {
+      if (!confirm("¿Deseas eliminar este producto?")) return;
+      try {
+        await fetch(`/api/productos/${id}`, { method: 'DELETE' });
+        cargarProductos();
+      } catch (err) {
+        console.error("Error al eliminar producto:", err);
+      }
+    }
+
+    async function cargarProductoEditar(id) {
+      try {
+        const res = await fetch(`/api/productos`);
+        const productos = await res.json();
+        const producto = productos.find(p => p._id === id);
+
+        document.getElementById('nombre').value = producto.nombre;
+        document.getElementById('precio').value = producto.precio;
+        document.getElementById('stock').value = producto.stock;
+        document.getElementById('categoria').value = producto.categoria;
+
+        document.getElementById('formProducto').setAttribute('data-id', id);
+      } catch (err) {
+        console.error("Error al cargar producto para editar:", err);
+      }
+    }
+
+    document.getElementById('formProducto').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const precio = parseFloat(document.getElementById('precio').value);
+      const stock = parseInt(document.getElementById('stock').value);
+      const categoria = document.getElementById('categoria').value.trim();
+      const id = e.target.getAttribute('data-id');
+
+      if (!nombre || isNaN(precio) || precio <= 0 || isNaN(stock) || stock < 0 || !categoria) {
+        return alert("Llena todos los campos correctamente.");
+      }
+
+      const producto = { nombre, precio, stock, categoria };
+
+      try {
+        if (id) {
+          await fetch(`/api/productos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(producto)
+          });
+          e.target.removeAttribute('data-id');
+        } else {
+          await fetch('/api/productos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(producto)
+          });
+        }
+
+        e.target.reset();
+        cargarProductos();
+      } catch (err) {
+        console.error("Error al guardar producto:", err);
+      }
+    });
+
+    cargarProductos();
+    window.eliminarProducto = eliminarProducto;
+    window.cargarProductoEditar = cargarProductoEditar;
+  </script>
+
+</body>
+</html>

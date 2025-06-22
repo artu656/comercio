@@ -1,0 +1,271 @@
+/* Fuentes y colores base */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Outfit', sans-serif;
+  background: linear-gradient(120deg, #f0f4f8, #ffffff);
+  color: #1e1e2f;
+}
+
+/* Menú */
+.menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0f172a;
+  padding: 18px 40px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.6s ease forwards;
+}
+
+.menu-logo {
+  font-size: 1.5rem;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.menu-links {
+  display: flex;
+  gap: 20px;
+}
+
+.menu a {
+  color: #cbd5e1;
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.menu a:hover {
+  background-color: #1e293b;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.menu a.cerrar {
+  background-color: #dc2626;
+  color: white;
+}
+
+.menu a.cerrar:hover {
+  background-color: #b91c1c;
+}
+
+/* Título */
+.titulo {
+  text-align: center;
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin: 50px 0 20px;
+  color: #111827;
+  animation: fadeIn 1s ease;
+}
+
+/* Sección de formulario */
+.formulario-section {
+  background: white;
+  max-width: 700px;
+  margin: 0 auto 40px;
+  padding: 40px;
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  animation: zoomIn 0.6s ease forwards;
+}
+
+.formulario-section h2 {
+  margin-bottom: 25px;
+  font-size: 1.6rem;
+  text-align: center;
+  color: #1e3a8a;
+}
+
+.formulario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.formulario input {
+  flex: 1 1 40%;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border 0.3s ease;
+}
+
+.formulario input:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+.formulario button {
+  flex: 1 1 100%;
+  background-color: #3b82f6;
+  color: white;
+  padding: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.formulario button:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.03);
+}
+
+/* Tabla de productos */
+.tabla-container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 0 auto 60px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  animation: fadeInUp 0.8s ease;
+}
+
+thead {
+  background-color: #1e293b;
+  color: white;
+  font-weight: 600;
+}
+
+th, td {
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+tbody tr:hover {
+  background-color: #f1f5f9;
+  transition: background 0.3s;
+}
+
+/* Botón eliminar */
+.btn-eliminar {
+  background-color: #ef4444;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.btn-eliminar:hover {
+  background-color: #b91c1c;
+  transform: scale(1.05);
+}
+
+/* Animaciones */
+@keyframes slideDown {
+  0% { transform: translateY(-50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoomIn {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.fila-animada {
+  animation: fadeInUp 0.5s ease;
+}
+/* Botón modificar */
+.btn-editar {
+  background-color: #10b981; /* verde */
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s;
+  margin-right: 8px; /* separa del botón eliminar */
+}
+
+.btn-editar:hover {
+  background-color: #059669;
+  transform: scale(1.05);
+}
+.acciones {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .menu {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
+  }
+
+  .menu-links {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .titulo {
+    font-size: 1.8rem;
+    margin: 30px 0 10px;
+  }
+
+  .formulario-section {
+    padding: 20px;
+    margin: 20px 10px;
+  }
+
+  .formulario {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .formulario input {
+    flex: 1 1 100%;
+  }
+
+  .formulario button {
+    flex: 1 1 100%;
+  }
+
+  .tabla-container {
+    width: 95%;
+    overflow-x: auto;
+  }
+
+  th, td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .btn-editar, .btn-eliminar {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+}
