@@ -5,20 +5,20 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // USA EL PUERTO QUE ASIGNE RAILWAY O LOCAL 3000
 
 // Middlewares
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Conexión a MongoDB (ajusta el nombre de la base si lo deseas)
-mongoose.connect('mongodb://localhost:27017/comercio', {
+// CONEXIÓN A MONGODB ATLAS USANDO VARIABLE DE ENTORNO
+mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-.then(() => console.log('Conectado a MongoDB'))
-.catch(err => console.error(err));
+.then(() => console.log('CONECTADO A MONGODB ATLAS'))
+.catch(err => console.error('ERROR DE CONEXIÓN:', err));
 
 // Esquema y modelo de usuario
 const UsuarioSchema = new mongoose.Schema({
